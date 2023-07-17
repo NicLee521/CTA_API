@@ -41,20 +41,19 @@ passport.use(new GoogleStrategy({
     }
     currentUser.lastVisited = new Date();
     await currentUser.save()
-    return done(null, {...currentUser._doc, accessToken});
+    return done(null, currentUser);
 }))
 
 passport.serializeUser((user, done) => {
     //@ts-ignore
-    done(null, {id: user._id, accessToken: user.accessToken});
+    done(null, user._id);
 });
   
-passport.deserializeUser(async (user: any, done) => {
+passport.deserializeUser(async (id, done) => {
     const currentUser = await User.findOne({
-        _id: user.id,
+        _id: id,
     });
-    //@ts-ignore
-    done(null, {...currentUser, accessToken: user.accessToken});
+    done(null, currentUser);
 });
   
 
