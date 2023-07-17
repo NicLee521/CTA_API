@@ -9,7 +9,10 @@
       "./tsconfig.json"
     ]
   },
-  "extends": "airbnb-typescript/base",
+  "extends":[
+    "airbnb-typescript/base",
+    "prettier"
+],
   "plugins": [
     "import",
     "@typescript-eslint"
@@ -21,7 +24,11 @@
     "no-return-assign": 0,
     "camelcase": 0,
     "import/extensions": 0,
-    "@typescript-eslint/no-redeclare": 0
+    "@typescript-eslint/no-redeclare": 0,
+    "indent" : ["error", 4, {
+        "SwitchCase": 1
+    }],
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": true}]
   },
   "settings": {
     "import/parsers": {

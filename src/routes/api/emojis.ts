@@ -5,7 +5,7 @@ const router = express.Router();
 type EmojiResponse = string[];
 
 router.get<{}, EmojiResponse>('/', (req, res) => {
-  res.json(['😀', '😳', '🙄']);
+    res.json(['😀', '😳', '🙄']);
 });
 
 export default router;
