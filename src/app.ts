@@ -22,7 +22,10 @@ app.use(session({
     store: new MongoStore({
         mongoUrl: process.env.MONGO_URL,
         ttl: 14 * 24 * 60 * 60,
-        autoRemove: 'native' 
+        autoRemove: 'native',
+        crypto: {
+            secret: process.env.CRYPTO_SECRET || '',
+        }
     })
 }))
 
@@ -36,6 +39,7 @@ app.use(passport.session())
 
 
 app.get<{}, MessageResponse>('/', (req, res) => {
+    console.log(req.user)
     res.json({
         message: '',
     });
