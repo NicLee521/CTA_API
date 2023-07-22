@@ -2,16 +2,16 @@ import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import session from 'express-session'
-import MongoStore from 'connect-mongo'
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import passport from './lib/passport';
-
 import * as middlewares from './middlewares';
 import routes from './routes';
 import MessageResponse from './interfaces/MessageResponse';
 
 
 require('./config');
+require('express-async-errors');
 
 const app = express();
 
@@ -33,13 +33,14 @@ app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
 app.use(passport.session())
+app.use(middlewares.addLogger);
 
 
 
 app.get<{}, MessageResponse>('/', (req, res) => {
-    console.log(req.user)
     res.json({
         message: '',
     });

@@ -1,14 +1,14 @@
-import { Schema, model, Model, Document } from 'mongoose';
+import { Schema, model, Model } from 'mongoose';
 import PassportUser from '../interfaces/PassportUser';
+import crypto from 'crypto'
 
 interface IUser {
     gId: string
     email: string;
     source: string;
-    refreshToken: string;
-    expiresAt: Date;
     profilePhoto?: string;
     lastVisited?: Date;
+    apiKey: string;
 }
 
 interface UserModel extends Model<IUser> {
@@ -30,18 +30,15 @@ const userSchema = new Schema<IUser, UserModel>({
         type: String,
         required: [true, "Source not specified"]
     },
-    refreshToken: {
-        type: String,
-        required: true
-    },
-    expiresAt: {
-        type: Date,
-    },
     lastVisited: {
         type: Date,
         default: new Date(),
     },
-    profilePhoto: String
+    profilePhoto: String,
+    apiKey: {
+        type: String,
+        default: crypto.randomBytes(20).toString('hex')
+    }
 },{
     statics: {
 
@@ -50,8 +47,6 @@ const userSchema = new Schema<IUser, UserModel>({
                 gId: passportUser.gId,
                 email: passportUser.email,
                 profilePhoto: passportUser.profilePhoto,
-                refreshToken: passportUser.refreshToken,
-                expiresAt: passportUser.expiresAt,
                 source: 'google'
             });
             return user.save();

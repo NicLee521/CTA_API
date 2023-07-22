@@ -1,8 +1,8 @@
-import express from 'express';
+import Router from 'express-promise-router';
 
 import api from './api';
 
-const router = express.Router();
+const router = Router();
 
 router.use('/api', api);
 

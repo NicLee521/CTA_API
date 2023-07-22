@@ -1,9 +1,9 @@
-import express from 'express';
-
+import Router from 'express-promise-router';
+import {validateUser} from '../../middlewares';
 import MessageResponse from '../../interfaces/MessageResponse';
-import emojis from './emojis';
+import story from './story';
 
-const router = express.Router();
+const router = Router();
 
 router.get<{}, MessageResponse>('/', (req, res) => {
     res.json({
@@ -11,6 +11,10 @@ router.get<{}, MessageResponse>('/', (req, res) => {
     });
 });
 
-router.use('/emojis', emojis);
+router.use(validateUser)
+
+router.use('/story', story);
+
+
 
 export default router;

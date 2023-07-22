@@ -26,8 +26,6 @@ passport.use(new GoogleStrategy({
         gId: profile.id,
         email: profile.emails[0].value,
         profilePhoto: profile.photos[0].value,
-        refreshToken: refreshToken,
-        expiresAt: new Date((new Date()).valueOf() + tokens.expires_in)
     }
     let currentUser = await User.getUserByEmail(passportUser);
     if(!currentUser) {
@@ -39,22 +37,20 @@ passport.use(new GoogleStrategy({
             message: `You have previously signed up with a different signin method`,
         });
     }
+    req.logger.info({typeOfLogin:'OAuth2'});
     currentUser.lastVisited = new Date();
     await currentUser.save()
-    return done(null, {...currentUser._doc, accessToken});
+    return done(null, currentUser);
 }))
 
-passport.serializeUser((user, done) => {
+passport.serializeUser((user , done) => {
     //@ts-ignore
-    done(null, {id: user._id, accessToken: user.accessToken});
+    done(null, user._id);
 });
 
-passport.deserializeUser(async (user: any, done) => {
-    const currentUser = await User.findOne({
-        _id: user.id,
-    });
-    //@ts-ignore
-    done(null, {...currentUser._doc, accessToken: user.accessToken});
+passport.deserializeUser(async (id: any, done) => {
+    const currentUser = await User.findById(id);
+    done(null, currentUser);
 });
   
 
