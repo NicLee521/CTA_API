@@ -30,7 +30,6 @@ export function errorHandler(err: Error, req: Request, res: Response<ErrorRespon
 
 export async function validateUser(req: Request, res: Response, next: NextFunction) {
     if(req.isAuthenticated()){
-        console.log('here', req.user)
         return next();
     }
     if(req.headers['x-api-key']) {
