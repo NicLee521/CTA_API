@@ -26,6 +26,8 @@ router.get('/', storyController.get.bind(storyController));
 
 router.post('/', uploadHandler.single('image'), storyController.post.bind(storyController));
 
+router.patch('/', storyController.update.bind(storyController))
+
 router.delete('/', storyController.delete.bind(storyController));
 
 export default router;

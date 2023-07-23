@@ -46,11 +46,18 @@ export class StoryController {
     }
 
     async update(req: Request, res: Response){
-
+        let choice = req.body.choice;
+        let storyId = req.body.story;
+        let story = await Story.findById(storyId);
+        story?.set('generatedStory', choice);
+        await story?.save();
+        return res.json(story);
     }
 
     async delete(req: Request, res: Response){
-
+        let storyId = req.body.story;
+        await Story.findByIdAndDelete(storyId);
+        return res.send(`Story ${storyId} has been deleted`);
     }
 
     formatJsonStory(fullText: Array<string>, name: string): CallToAdventureStory {

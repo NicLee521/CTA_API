@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NextFunction, Request, Response } from 'express';
 import User from './models/user';
 import { createLogger, format, transports } from 'winston';
@@ -16,6 +17,10 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: Error, req: Request, res: Response<ErrorResponse>, next: NextFunction) {
     const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+    req.logger.error({
+        message: err.message,
+        stack: err.stack,
+    })
     res.status(statusCode);
     res.json({
         message: err.message,
@@ -24,20 +29,19 @@ export function errorHandler(err: Error, req: Request, res: Response<ErrorRespon
 }
 
 export async function validateUser(req: Request, res: Response, next: NextFunction) {
-    if(req.user){
+    if(req.isAuthenticated()){
+        console.log('here', req.user)
         return next();
     }
     if(req.headers['x-api-key']) {
-        //@ts-ignore
         req.user = await User.findOne({apiKey: req.headers['x-api-key']});
-        //@ts-ignore
         req.session.passport = {user: String(req.user._id)}
         req.logger.info({typeOfLogin: 'apiKey'});
         return req.session.save(err => {
             next(err);
         })
     }
-    return res.redirect('/login/google')
+    return res.status(401).json({error: 'Unauthenticated'})
 }
 
 export function addLogger(req: Request, res: Response, next: NextFunction) {

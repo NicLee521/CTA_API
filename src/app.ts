@@ -3,11 +3,11 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import MongoStore from 'connect-mongo';
 import passport from './lib/passport';
 import * as middlewares from './middlewares';
 import routes from './routes';
-import MessageResponse from './interfaces/MessageResponse';
 
 
 require('./config');
@@ -19,6 +19,9 @@ app.use(session({
     secret: process.env.EXPRESS_SESSION_SECRET || '',
     resave: false,
     saveUninitialized: true,
+    cookie: { 
+        maxAge:  1000 * 60 * 60 * 24,
+    },
     store: new MongoStore({
         mongoUrl: process.env.MONGO_URL,
         ttl: 14 * 24 * 60 * 60,
@@ -28,35 +31,52 @@ app.use(session({
         }
     })
 }))
-
+app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    optionsSuccessStatus: 200,
+}));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
-app.use(passport.session())
+app.use(passport.session());
 app.use(middlewares.addLogger);
-
-
-
-app.get<{}, MessageResponse>('/', (req, res) => {
-    res.json({
-        message: '',
-    });
-});
 
 app.get('/login/google', passport.authenticate('google', {
     accessType: 'offline',
     prompt: 'consent',
 }));
 
+app.get("/login/failed", (req,res) => {
+    res.status(401).json({
+        success:false,
+        message: "failure",
+    });
+});
+
 app.get('/oauth2/redirect/google',
-    passport.authenticate('google', { failureRedirect: '/login', failureMessage: true}),
-    function(req, res) {
-        res.redirect('/');
-    }
+    passport.authenticate('google', { failureRedirect: '/login/failed', failureMessage: true, successRedirect: process.env.FRONTEND_URL}),
 );
+
+app.get("/user", (req, res) => {
+    if(req.isAuthenticated()){
+        return res.send(req.user);
+    }
+    res.status(401).send('Not Authenticated')
+})
+
+app.get("/logout", (req, res, next) => {
+    if (req.user) {
+        req.logout((err) => {
+            if(err) {return next(err)}
+            res.send('done')
+        });
+    }
+})
 
 app.use(routes);
 
