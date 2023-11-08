@@ -69,6 +69,10 @@ app.get("/user", (req, res) => {
     res.status(401).send('Not Authenticated')
 })
 
+app.get("/", (req, res) => {
+    res.status(200).send('Success')
+})
+
 app.get("/logout", (req, res, next) => {
     if (req.user) {
         req.logout((err) => {
