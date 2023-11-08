@@ -1,3 +1,17 @@
 export default [
-    'Sailor'
+    'Sailor',
+    'Student',
+    'Beggar',
+    'Noble',
+    'Performer',
+    'Squire',
+    'Farmer',
+    'Apprentice',
+    'Merchant',
+    'Conscript',
+    'Acolyte',
+    'Hunter',
+    'Outlander',
+    'Settler',
+    'Pickpocket',
 ]

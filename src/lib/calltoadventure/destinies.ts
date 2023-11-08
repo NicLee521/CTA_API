@@ -1,3 +1,18 @@
 export default [
+    'Force of Darkness',
+    'Force of Darkness',
+    'Wise Master',
+    'Heir to the Throne',
+    'Mighty Conqueror',
+    'Blood of the Dragon',
+    'Hand of Vengeance',
+    'People\'s Champion',
+    'Paragon of Light',
+    'Hero of Destiny',
+    'Master of Whispers',
+    'High Arcanist',
+    'Intrepid Explorer',
+    'Hand of Fate',
     'Cunning Villain',
+    'One With Nature',
 ]

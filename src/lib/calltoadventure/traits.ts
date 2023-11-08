@@ -1,4 +1,22 @@
 export default {
     'Rebellious': {stage: 'early'},
-    'Criminal': {stage: 'middle'}
+    'Criminal': {stage: 'middle'},
+    'Adventurous': {stage: 'early'},
+    'Brave': {stage: 'early'},
+    'Studious': {stage: 'early'},
+    'Spiritual': {stage: 'early'},
+    'Secret Royalty': {stage: 'early'},
+    'Orphan': {stage: 'early'},
+    'Foundling': {stage: 'early'},
+    'Inventive': {stage: 'middle'},
+    'Honorable': {stage: 'middle'},
+    'Rags to Riches': {stage: 'middle'},
+    'Enlightened': {stage: 'middle'},
+    'Tragic Loss': {stage: 'middle'},
+    'Vengeful': {stage: 'middle'},
+    'Inspiring': {stage: 'middle'},
+    'Blessed': {stage: 'late'},
+    'Arcane': {stage: 'late'},
+    'Supernatural': {stage: 'late'},
+    'Cursed': {stage: 'late'},
 }

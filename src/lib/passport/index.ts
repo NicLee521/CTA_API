@@ -6,12 +6,7 @@ require('dotenv').config();
 
 
 let getHost = () => {
-    switch(process.env.NODE_ENV){
-        case 'local':
-            return 'http://localhost:8080'
-        case 'prod':
-            return 'not exist'
-    }
+    return process.env.ORIGIN;
 }
 
 //@ts-ignore

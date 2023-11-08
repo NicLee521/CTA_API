@@ -1,3 +1,17 @@
 export default [
     'Born Lucky',
+    'Sole Survivor',
+    'Vow of Vengeance',
+    'Chosen by the Light',
+    'Lone Wanderer',
+    'Thrill Seeker',
+    'Seeker of Truth',
+    'Trained by a Master',
+    'Pure of Heart',
+    'Sworn Protector',
+    'Driven to Despair',
+    'Bound by Honor',
+    'Tempted by Darkness',
+    'Thirst for Knowledge',
+    'Natural Leader',
 ]
