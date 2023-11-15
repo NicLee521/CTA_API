@@ -14,7 +14,7 @@ require('./config');
 require('express-async-errors');
 
 const app = express();
-
+app.set('trust proxy', 1)
 app.use(session({
     secret: process.env.EXPRESS_SESSION_SECRET || '',
     resave: false,
