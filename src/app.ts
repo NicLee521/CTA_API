@@ -14,7 +14,13 @@ require('./config');
 require('express-async-errors');
 
 const app = express();
-app.set('trust proxy', 1)
+app.set('trust proxy', 1);
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    optionsSuccessStatus: 200,
+}));
 app.use(session({
     secret: process.env.EXPRESS_SESSION_SECRET || '',
     resave: false,
@@ -36,12 +42,6 @@ app.use(session({
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(helmet());
-app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
-    optionsSuccessStatus: 200,
-}));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
