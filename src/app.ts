@@ -80,6 +80,10 @@ app.get("/logout", (req, res, next) => {
     }
 })
 
+app.get("/health", (req, res) => {
+    res.status(200).send('healthy')
+})
+
 app.use(routes);
 
 app.use(middlewares.notFound);
