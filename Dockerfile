@@ -1,23 +1,40 @@
-# Step 1: Use an official Node.js runtime as a parent image
-FROM node:20
+# Stage 1: Build
+# Use an official Node.js runtime as a parent image for the build stage
+FROM node:20 AS builder
 
-# Step 2: Set the working directory inside the container
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Step 3: Copy package.json and package-lock.json (if available)
+# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# Step 4: Install project dependencies
+# Install dependencies including 'devDependencies'
 RUN npm install
 
-# Step 5: Copy the rest of your app's source code
+# Copy the rest of your app's source code
 COPY . .
 
-# Step 6: Compile TypeScript to JavaScript
+# Compile TypeScript to JavaScript
 RUN npm run build
 
-# Step 7: Open the port your app runs on
-EXPOSE 8000
+# Stage 2: Run
+# Use a smaller base image
+FROM node:20
 
-# Step 8: Define the command to run your app using npm start script
-CMD [ "npm", "run", "start-prod" ]
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --only=production
+
+# Copy built artifacts from the 'builder' stage
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Open the port your app runs on
+EXPOSE 8080
+
+# Define the command to run your app
+CMD [ "node", "dist/app.js" ]
