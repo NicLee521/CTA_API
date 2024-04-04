@@ -37,4 +37,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 EXPOSE 8080
 
 # Define the command to run your app
-CMD [ "node", "dist/app.js" ]
+CMD [ "node", "dist" ]
