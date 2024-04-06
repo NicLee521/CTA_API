@@ -27,9 +27,8 @@ app.use(session({
     saveUninitialized: true,
     cookie: { 
         maxAge:  1000 * 60 * 60 * 24,
-        sameSite: 'lax',
+        sameSite: 'none',
         secure: true,
-        domain: process.env.DOMAIN,
     },
     store: new MongoStore({
         mongoUrl: process.env.MONGO_URL,
@@ -62,14 +61,7 @@ app.get("/login/failed", (req,res) => {
 });
 
 app.get('/oauth2/redirect/google',
-    passport.authenticate('google', { failureRedirect: '/login/failed', failureMessage: true}),
-    (req, res) => {
-        console.log(req.user);
-        console.log(req.session);
-        req.session.save(err => {
-            res.redirect('/user');
-        })
-    }
+    passport.authenticate('google', { failureRedirect: '/login/failed', failureMessage: true, successRedirect: '/user'}),
 );
 
 app.get("/user", (req, res) => {
