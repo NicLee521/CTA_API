@@ -66,7 +66,9 @@ app.get('/oauth2/redirect/google',
     (req, res) => {
         console.log(req.user);
         console.log(req.session);
-        res.redirect('/user')
+        req.session.save(err => {
+            res.redirect('/user');
+        })
     }
 );
 
