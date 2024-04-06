@@ -10,4 +10,6 @@ async function main() {
     );
 }
 
-main().catch((err) => console.log(err));
+main()
+    .then(res => console.log('mongo connected', res))
+    .catch((err) => console.log(err));
