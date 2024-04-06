@@ -39,14 +39,12 @@ passport.use(new GoogleStrategy({
 }))
 
 passport.serializeUser((user , done) => {
-    console.log(user, 'serial');
     //@ts-ignore
     done(null, String(user._id));
 });
 
 passport.deserializeUser(async (id: any, done) => {
     const currentUser = await User.findById(id);
-    console.log(currentUser)
     done(null, currentUser);
 });
   

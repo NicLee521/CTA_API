@@ -62,11 +62,15 @@ app.get("/login/failed", (req,res) => {
 });
 
 app.get('/oauth2/redirect/google',
-    passport.authenticate('google', { failureRedirect: '/login/failed', failureMessage: true, successRedirect: '/user'}),
+    passport.authenticate('google', { failureRedirect: '/login/failed', failureMessage: true}),
+    (req, res) => {
+        console.log(req.user);
+        console.log(req.session);
+        res.redirect('/user')
+    }
 );
 
 app.get("/user", (req, res) => {
-    console.log(req.user);
     if(req.isAuthenticated()){
         return res.send(req.user);
     }
