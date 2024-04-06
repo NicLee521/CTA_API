@@ -25,6 +25,8 @@ app.use(session({
     secret: process.env.EXPRESS_SESSION_SECRET || '',
     resave: false,
     saveUninitialized: true,
+    proxy: true,
+    name: 'AuthCookies',
     cookie: { 
         maxAge:  1000 * 60 * 60 * 24,
         sameSite: 'none',
