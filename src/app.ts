@@ -12,7 +12,7 @@ import routes from './routes';
 
 require('./config');
 require('express-async-errors');
-
+console.log(process.env.DOMAIN);
 const app = express();
 app.set('trust proxy', 1);
 app.use(cors({
@@ -27,8 +27,9 @@ app.use(session({
     saveUninitialized: true,
     cookie: { 
         maxAge:  1000 * 60 * 60 * 24,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true,
+        domain: process.env.DOMAIN,
     },
     store: new MongoStore({
         mongoUrl: process.env.MONGO_URL,
