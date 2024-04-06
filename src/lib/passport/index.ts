@@ -32,7 +32,6 @@ passport.use(new GoogleStrategy({
             message: `You have previously signed up with a different signin method`,
         });
     }
-    req.user = currentUser;
     req.logger.info({typeOfLogin:'OAuth2'});
     currentUser.lastVisited = new Date();
     await currentUser.save()
