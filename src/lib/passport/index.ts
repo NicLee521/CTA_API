@@ -24,6 +24,7 @@ passport.use(new GoogleStrategy({
     }
     console.log(req.session)
     let currentUser = await User.getUserByEmail(passportUser);
+    console.log(currentUser);
     if(!currentUser) {
         const newUser = await User.createUser(passportUser);
         return done(null, newUser)
