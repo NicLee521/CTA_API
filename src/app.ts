@@ -66,6 +66,7 @@ app.get('/oauth2/redirect/google',
 );
 
 app.get("/user", (req, res) => {
+    console.log(req.user);
     if(req.isAuthenticated()){
         return res.send(req.user);
     }
