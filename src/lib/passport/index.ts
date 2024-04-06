@@ -22,9 +22,7 @@ passport.use(new GoogleStrategy({
         email: profile.emails[0].value,
         profilePhoto: profile.photos[0].value,
     }
-    console.log(req.session)
     let currentUser = await User.getUserByEmail(passportUser);
-    console.log(currentUser);
     if(!currentUser) {
         const newUser = await User.createUser(passportUser);
         return done(null, newUser)
@@ -34,6 +32,7 @@ passport.use(new GoogleStrategy({
             message: `You have previously signed up with a different signin method`,
         });
     }
+    req.user = currentUser;
     req.logger.info({typeOfLogin:'OAuth2'});
     currentUser.lastVisited = new Date();
     await currentUser.save()
