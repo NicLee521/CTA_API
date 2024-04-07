@@ -30,6 +30,7 @@ app.use(session({
         sameSite: 'none',
         secure: true,
         httpOnly: true,
+        domain: 'genquests.com'
     },
     store: new MongoStore({
         mongoUrl: process.env.MONGO_URL,
