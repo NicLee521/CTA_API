@@ -46,7 +46,8 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 export async function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
-    if (!token) {
+    console.log(token);
+    if (!token || token === 'null') {
         return res.status(401).send('Not Authenticated');
     }
     try {
@@ -55,7 +56,7 @@ export async function authenticateToken(req, res, next) {
         req.user = user;
         next();
     } catch (err) {
-        res.status(403).send('Invalid auth')
+        return res.status(403).send('Invalid auth')
     }
 };
 

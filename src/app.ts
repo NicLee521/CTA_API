@@ -55,12 +55,16 @@ app.get('/oauth2/redirect/google',
     }
 );
 
-app.get("/user", middlewares.authenticateToken)
+app.get("/user", middlewares.authenticateToken, (req: any, res) => {
+    if(req.user) {
+        return res.status(200).json(req.user);
+    }
+})
 
 app.get("/logout", middlewares.authenticateToken, (req, res) => {
     if (req.user) {
         req.logger.info('Logged out')
-        res.status(200).send('done');
+        return res.status(200).send('done');
     }
     res.send('logged out')
 })
