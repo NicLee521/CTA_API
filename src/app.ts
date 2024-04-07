@@ -12,11 +12,10 @@ import routes from './routes';
 
 require('./config');
 require('express-async-errors');
-console.log(process.env.DOMAIN);
 const app = express();
 app.set('trust proxy', true)
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: /\.genquests\.com$/,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
     optionsSuccessStatus: 200,
