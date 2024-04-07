@@ -14,7 +14,7 @@ require('./config');
 require('express-async-errors');
 console.log(process.env.DOMAIN);
 const app = express();
-app.set('trust proxy', 1)
+app.set('trust proxy', true)
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -25,6 +25,7 @@ app.use(session({
     secret: process.env.EXPRESS_SESSION_SECRET || '',
     resave: false,
     saveUninitialized: true,
+    proxy: true,
     cookie: { 
         maxAge:  1000 * 60 * 60 * 24,
         sameSite: 'none',
