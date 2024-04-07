@@ -13,9 +13,9 @@ import routes from './routes';
 require('./config');
 require('express-async-errors');
 const app = express();
-app.set('trust proxy', true)
+app.set('trust proxy', 2)
 app.use(cors({
-    origin: /\.genquests\.com$/,
+    origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
     optionsSuccessStatus: 200,
