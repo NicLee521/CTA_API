@@ -2,9 +2,8 @@ import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import session from 'express-session';
+import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser';
-import MongoStore from 'connect-mongo';
 import passport from './lib/passport';
 import * as middlewares from './middlewares';
 import routes from './routes';
@@ -20,36 +19,13 @@ app.use(cors({
     credentials: true,
     optionsSuccessStatus: 200,
 }));
-app.use(session({
-    secret: process.env.EXPRESS_SESSION_SECRET || '',
-    resave: false,
-    saveUninitialized: true,
-    proxy: true,
-    cookie: { 
-        maxAge:  1000 * 60 * 60 * 24,
-        sameSite: 'none',
-        secure: true,
-        httpOnly: true,
-        domain: 'genquests.com'
-    },
-    store: new MongoStore({
-        mongoUrl: process.env.MONGO_URL,
-        ttl: 14 * 24 * 60 * 60,
-        autoRemove: 'native',
-        crypto: {
-            secret: process.env.CRYPTO_SECRET || '',
-        }
-    })
-}))
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
-app.use(passport.session());
 app.use(middlewares.addLogger);
-
 app.get('/login/google', passport.authenticate('google', {
     accessType: 'offline',
     prompt: 'consent',
@@ -63,23 +39,35 @@ app.get("/login/failed", (req,res) => {
 });
 
 app.get('/oauth2/redirect/google',
-    passport.authenticate('google', { failureRedirect: '/login/failed', failureMessage: true, successRedirect: '/user'}),
+    passport.authenticate('google', { 
+        failureRedirect: '/login/failed', 
+        failureMessage: true,
+        session: false,
+    }),
+    (req, res) => {
+        const user = {
+            id: String(req.user._id),
+            name: req.user.email,
+        }
+        const token = jwt.sign(user, process.env.EXPRESS_SESSION_SECRET || 'shhh', {expiresIn: '2h'});
+        const FRONTEND_URL = process.env.FRONTEND_URL || 'localhost:3000';
+        res.redirect(FRONTEND_URL + `/?token=${token}`)
+    }
 );
 
-app.get("/user", (req, res) => {
-    if(req.isAuthenticated()){
+app.get("/user", middlewares.authenticateToken, (req, res) => {
+    if(req.user){
         return res.send(req.user);
     }
     res.status(401).send('Not Authenticated')
 })
 
-app.get("/logout", (req, res, next) => {
+app.get("/logout", middlewares.authenticateToken, (req, res) => {
     if (req.user) {
-        req.logout((err) => {
-            if(err) {return next(err)}
-            res.send('done')
-        });
+        req.logger.info('Logged out')
+        res.status(200).send('done');
     }
+    res.send('logged out')
 })
 
 app.get("/health", (req, res) => {

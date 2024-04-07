@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import User from './models/user';
 import { createLogger, format, transports } from 'winston';
 const { combine, timestamp, label, json } = format;
-
+import jwt from 'jsonwebtoken';
 
 
 import ErrorResponse from './interfaces/ErrorResponse';
@@ -14,7 +14,6 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
     next(error);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: Error, req: Request, res: Response<ErrorResponse>, next: NextFunction) {
     const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
     req.logger.error({
@@ -26,6 +25,7 @@ export function errorHandler(err: Error, req: Request, res: Response<ErrorRespon
         message: err.message,
         stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
     });
+    next();
 }
 
 export async function validateUser(req: Request, res: Response, next: NextFunction) {
@@ -42,6 +42,22 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
     }
     return res.status(401).json({error: 'Unauthenticated'})
 }
+
+export async function authenticateToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).send('Not Authenticated');
+    }
+    try {
+        let user = await jwt.verify(token, process.env.EXPRESS_SESSION_SECRET || 'shhh');
+        user = await User.findById(user.id);
+        req.user = user;
+        next();
+    } catch (err) {
+        res.status(403).send('Invalid auth')
+    }
+};
 
 export function addLogger(req: Request, res: Response, next: NextFunction) {
     const logger = createLogger({

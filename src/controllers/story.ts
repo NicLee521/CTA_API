@@ -21,6 +21,7 @@ export class StoryController {
     }
 
     async post(req: Request, res: Response){
+        try {
         if(!req.file) throw Error('No File Found')
         let story = req.body.story;
         let name = req.body.name
@@ -43,6 +44,9 @@ export class StoryController {
         let completionData = await this.getWrittenStoryFromOpenAi(jsonStory);
         req.logger.info({openAiUsage: completionData.usage})
         return res.json({choices: completionData.choices, storyId: story._id.toString()});
+        } catch(e: any) {
+            console.log(e.response.data)
+        }
     }
 
     async update(req: Request, res: Response){

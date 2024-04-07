@@ -1,10 +1,10 @@
 import Router from 'express-promise-router';
-import {validateUser} from '../../middlewares';
+import {authenticateToken} from '../../middlewares';
 import story from './story';
 
 const router = Router();
 
-router.use(validateUser)
+router.use(authenticateToken)
 
 router.use('/story', story);
 
