@@ -14,7 +14,7 @@ require('./config');
 require('express-async-errors');
 console.log(process.env.DOMAIN);
 const app = express();
-app.set('trust proxy', 5)
+app.set('trust proxy', 1)
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -25,12 +25,11 @@ app.use(session({
     secret: process.env.EXPRESS_SESSION_SECRET || '',
     resave: false,
     saveUninitialized: true,
-    proxy: true,
-    name: 'AuthCookies',
     cookie: { 
         maxAge:  1000 * 60 * 60 * 24,
         sameSite: 'none',
         secure: true,
+        httpOnly: true,
     },
     store: new MongoStore({
         mongoUrl: process.env.MONGO_URL,
