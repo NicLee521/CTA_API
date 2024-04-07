@@ -55,12 +55,7 @@ app.get('/oauth2/redirect/google',
     }
 );
 
-app.get("/user", middlewares.authenticateToken, (req, res) => {
-    if(req.user){
-        return res.send(req.user);
-    }
-    res.status(401).send('Not Authenticated')
-})
+app.get("/user", middlewares.authenticateToken)
 
 app.get("/logout", middlewares.authenticateToken, (req, res) => {
     if (req.user) {
