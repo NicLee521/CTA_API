@@ -14,7 +14,7 @@ require('./config');
 require('express-async-errors');
 console.log(process.env.DOMAIN);
 const app = express();
-app.set('trust proxy', true)
+app.set('trust proxy', 5)
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
