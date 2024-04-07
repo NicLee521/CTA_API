@@ -46,7 +46,6 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 export async function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
-    console.log(token);
     if (!token || token === 'null') {
         return res.status(401).send('Not Authenticated');
     }
