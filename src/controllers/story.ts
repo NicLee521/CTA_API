@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import Story from '../models/story';
+import Story from '../models/story.js';
 import vision from '@google-cloud/vision'
-import UserType from '../interfaces/Request'
+import UserType from '../interfaces/Request.js'
 import { Configuration, OpenAIApi } from 'openai'
-import * as callToAdventureCards from '../lib/calltoadventure'
-import CallToAdventureStory from "../interfaces/CallToAdventureStory";
+import * as callToAdventureCards from '../lib/calltoadventure/index.js'
+import CallToAdventureStory from "../interfaces/CallToAdventureStory.js";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -16,7 +16,7 @@ export class StoryController {
 
     async get(req: Request, res: Response){
         let user = req.user || {} as UserType;
-        let allUsersStories = await Story.find({user: user._id})
+        let allUsersStories = await Story.find({user: user.id})
         res.json(allUsersStories);
     }
 
@@ -26,7 +26,7 @@ export class StoryController {
         let name = req.body.name
         //@ts-ignore
         story.set('image', req.file.uri);
-        story.set('user', req.user._id);
+        story.set('user', req.user.id);
         let client = new vision.ImageAnnotatorClient();
         let response = await client.textDetection({
             image:{

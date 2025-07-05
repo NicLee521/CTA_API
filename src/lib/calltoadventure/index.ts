@@ -1,10 +1,10 @@
-import unTypedadversaries from "./adversaries"
-import unTypedallies from "./allies"
-import unTypedchallenges from "./challenges"
-import motivations from "./motivations"
-import origins from "./origins"
-import unTypedtraits from "./traits"
-import destinies from "./destinies"
+import unTypedadversaries from "./adversaries.js"
+import unTypedallies from "./allies.js"
+import unTypedchallenges from "./challenges.js"
+import motivations from "./motivations.js"
+import origins from "./origins.js"
+import unTypedtraits from "./traits.js"
+import destinies from "./destinies.js"
 
 let adversaries = unTypedadversaries as any; 
 let allies = unTypedallies as any; 

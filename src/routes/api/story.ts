@@ -1,14 +1,14 @@
 import Router from 'express-promise-router';
 import multer from 'multer';
-import MulterGoogleCloudStorage from 'multer-cloud-storage';
-import Story from '../../models/story';
+import {storageEngine} from 'multer-cloud-storage';
+import Story from '../../models/story.js';
 
 
-import {StoryController} from '../../controllers/story'
+import {StoryController} from '../../controllers/story.js'
 import { Request } from 'express';
 
 const uploadHandler = multer({
-    storage: new MulterGoogleCloudStorage({
+    storage: storageEngine({
         bucket: 'cta_image_storage',
         filename: (req: Request, file: any, cb: Function) => {
             let story = new Story();

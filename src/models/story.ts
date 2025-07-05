@@ -1,5 +1,5 @@
 import { Schema, model, Model, Types } from 'mongoose';
-import CallToAdventureStory from '../interfaces/CallToAdventureStory';
+import CallToAdventureStory from '../interfaces/CallToAdventureStory.js';
 
 interface IStory {
     image: string,

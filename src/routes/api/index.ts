@@ -1,6 +1,6 @@
 import Router from 'express-promise-router';
-import {authenticateToken} from '../../middlewares';
-import story from './story';
+import {authenticateToken} from '../../middlewares.js';
+import story from './story.js';
 
 const router = Router();
 

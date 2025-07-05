@@ -1,6 +1,5 @@
 import mongoose, { ConnectOptions } from "mongoose";
-require('dotenv').config();
-
+import 'dotenv/config';
 async function main() {
     await mongoose.connect(String(process.env.MONGO_URL),
         {

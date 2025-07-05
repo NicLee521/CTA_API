@@ -1,13 +1,8 @@
-import {Types} from 'mongoose';
 import { Logger } from 'winston';
 
 export default interface User {
-    _id: Types.ObjectId
-    gId: string
+    id: string
     email: string;
-    source: string;
-    profilePhoto?: string;
-    lastVisited?: Date;
 }
 
 
