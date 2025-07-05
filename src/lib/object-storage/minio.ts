@@ -33,6 +33,16 @@ class MinioClient {
         }
     }
 
+    async deleteFile(bucketName: string, objectName: string): Promise<void> {
+        try {
+            await this.client.removeObject(bucketName, objectName);
+            console.log(`File deleted successfully from ${bucketName}/${objectName}`);
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            throw error;
+        }
+    }
+
 }
 
 export { MinioClient };

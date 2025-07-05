@@ -8,6 +8,7 @@ import { unlink } from "fs/promises";
 import type OpenAI from "openai";
 import { createWorker } from 'tesseract.js';
 import { z } from "zod";
+import { MinioClient } from "../lib/object-storage/minio.js";
 
 export class StoryController {
 
@@ -46,7 +47,21 @@ export class StoryController {
 
     async delete(req: Request, res: Response){
         let storyId = req.body.story;
+        let story = await Story.findById(storyId);
+        if (!story) {
+            return res.send(`Story ${storyId} has been deleted`);
+        }
+        if (story.image) {
+            const minioClient = new MinioClient();
+            try {
+                let [bucketName, objectName] = story.image.split('/');
+                await minioClient.deleteFile(bucketName, objectName);
+            } catch (error) {
+                console.error('Error deleting file from MinIO:', error);
+            }
+        }
         await Story.findByIdAndDelete(storyId);
+
         return res.send(`Story ${storyId} has been deleted`);
     }
 
