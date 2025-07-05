@@ -59,5 +59,5 @@ export {
     motivations,
     origins,
     traits,
-    destinies
+    destinies,
 };

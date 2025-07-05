@@ -73,14 +73,15 @@ export class StoryController {
         await worker.terminate();
         const response = await openai.createAIResponse(
             `Given the following text, extract the values that match any of the following card names: ${allCards.join(', ')}.
-            Use your best judgement to determine the card names.`
+            Use your best judgement to determine the card names please be extra careful and get all the cards.`
             , [{ role: 'user', content: fullText }],
             z.object({
                 cards: z.array(z.string()).describe('Array of card names found in the text')
             })
         );
         const outputParsed = response.output_parsed as { cards: string[] };
-        for (let key of outputParsed.cards) {
+        let foundCardsSet = new Set();
+        function handleCard(key: string) {
             let data: any = null;
             if (callToAdventureCards.challenges && key in callToAdventureCards.challenges) {
                 data = { ...callToAdventureCards.challenges[key as keyof typeof callToAdventureCards.challenges], choice: key, type: 'challenges' };
@@ -100,15 +101,25 @@ export class StoryController {
             if (data) {
                 if (data.type === 'origin' || data.type === 'motivation' || data.type === 'destiny') {
                     jsonStory[data.stage][data.type] = data.card;
-                    continue;
+                    return;
                 } else {
                     let {type, stage, ...rest} = data;
                     jsonStory[stage][data.type].push(rest);
-                    continue
+                    return;
                 }
-                
             }
         }
+        for (let key of outputParsed.cards) {
+            foundCardsSet.add(key);
+            handleCard(key);
+        }
+        for (let card of allCards) {
+            if (!foundCardsSet.has(card) && fullText.includes(card)) {
+                console.log(`Card not caught by OpenAI: ${card}`);
+                handleCard(card);
+            }
+        }
+
         jsonStory.early.name = name;
         return {response, jsonStory} 
     }
