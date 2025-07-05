@@ -15,4 +15,4 @@ export default [
     'Hand of Fate',
     'Cunning Villain',
     'One With Nature',
-]
+] as const;

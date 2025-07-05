@@ -1,16 +1,13 @@
 import { Request, Response } from "express";
 import Story from '../models/story.js';
-import vision from '@google-cloud/vision'
 import UserType from '../interfaces/Request.js'
-import { Configuration, OpenAIApi } from 'openai'
-import * as callToAdventureCards from '../lib/calltoadventure/index.js'
-import CallToAdventureStory from "../interfaces/CallToAdventureStory.js";
-
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
+import { OpenAIClient } from "../lib/openai.js";
+import * as CallToAdventureData from "../lib/calltoadventure/index.js";
+const { baseStory, baseStorySchema, allCards, ...callToAdventureCards } = CallToAdventureData;
+import { unlink } from "fs/promises";
+import type OpenAI from "openai";
+import { createWorker } from 'tesseract.js';
+import { z } from "zod";
 
 export class StoryController {
 
@@ -21,28 +18,21 @@ export class StoryController {
     }
 
     async post(req: Request, res: Response){
-        if(!req.file) throw Error('No File Found')
+        if(!req.objectLocation || !req.file) throw Error('File not uploaded to object storage');
         let story = req.body.story;
         let name = req.body.name
         //@ts-ignore
-        story.set('image', req.file.uri);
+        story.set('image', req.objectLocation);
         story.set('user', req.user.id);
-        let client = new vision.ImageAnnotatorClient();
-        let response = await client.textDetection({
-            image:{
-                source: {
-                    imageUri: story.image
-                },
-            }
-        });
-        let fullText = response[0].fullTextAnnotation?.text || ''
-        story.set('imageTextAnnotation', fullText)
-        let jsonStory = this.formatJsonStory(fullText.split('\n'), name);
-        story.set('jsonStory', jsonStory)
+        const openai = new OpenAIClient();
+        let {response, jsonStory} = await this.formatJsonStory(req.file.path, name, openai);
+        req.logger.info({openAiUsage: response.usage})
+        story.set('jsonStory', jsonStory);
         await story.save();
-        let completionData = await this.getWrittenStoryFromOpenAi(jsonStory);
+        let completionData = await this.getWrittenStoryFromOpenAi(jsonStory, openai);
         req.logger.info({openAiUsage: completionData.usage})
-        return res.json({choices: completionData.choices, storyId: story._id.toString()});
+        await unlink(req.file.path); // Delete the file after processing
+        return res.json({choices: completionData.output_text, storyId: story._id.toString()});
     }
 
     async update(req: Request, res: Response){
@@ -60,56 +50,93 @@ export class StoryController {
         return res.send(`Story ${storyId} has been deleted`);
     }
 
-    formatJsonStory(fullText: Array<string>, name: string): CallToAdventureStory {
-        let story = {...callToAdventureCards.baseStory} as any
-        story.name = name;
-        for(let piece of fullText) {
-            piece = piece.replace(/^\+1\s/, '');
-            if(callToAdventureCards.challenges[piece]) {
-                let challenge = callToAdventureCards.challenges[piece]
-                story[challenge.stage].challenges.push({challenge: challenge.challenge, choice: piece})
+    async formatJsonStory(imagePath: string, name: string, openai: OpenAIClient): Promise<any> {
+        let jsonStory = JSON.parse(JSON.stringify(baseStory));
+        const worker = await createWorker('eng');
+        const ret = await worker.recognize(imagePath);
+        const fullText = ret.data.text;
+        await worker.terminate();
+        const response = await openai.createAIResponse(
+            `Given the following text, extract the values that match any of the following card names: ${allCards.join(', ')}.
+            Use your best judgement to determine the card names.`
+            , [{ role: 'user', content: fullText }],
+            z.object({
+                cards: z.array(z.string()).describe('Array of card names found in the text')
+            })
+        );
+        const outputParsed = response.output_parsed as { cards: string[] };
+        for (let key of outputParsed.cards) {
+            let data: any = null;
+            if (callToAdventureCards.challenges && key in callToAdventureCards.challenges) {
+                data = { ...callToAdventureCards.challenges[key as keyof typeof callToAdventureCards.challenges], type: 'challenges' };
+            } else if (callToAdventureCards.adversaries && key in callToAdventureCards.adversaries) {
+                data = { ...callToAdventureCards.adversaries[key as keyof typeof callToAdventureCards.adversaries], type: 'adversaries' };
+            } else if (callToAdventureCards.traits && key in callToAdventureCards.traits) {
+                data = { ...callToAdventureCards.traits[key as keyof typeof callToAdventureCards.traits], type: 'traits' };
+            } else if (callToAdventureCards.allies && key in callToAdventureCards.allies) {
+                data = { ...callToAdventureCards.allies[key as keyof typeof callToAdventureCards.allies], type: 'allies' };
+            } else if (callToAdventureCards.origins?.includes(key as typeof callToAdventureCards.origins[number])) {
+                data = { stage: 'early', card: key, type: 'origin' };
+            } else if (callToAdventureCards.motivations?.includes(key as typeof callToAdventureCards.motivations[number])) {
+                data = { stage: 'middle', card: key, type: 'motivation' };
+            } else if (callToAdventureCards.destinies?.includes(key as typeof callToAdventureCards.destinies[number])) {
+                data = { stage: 'late', card: key, type: 'destiny' };
             }
-            if(callToAdventureCards.adversaries[piece]) {
-                let adversary = callToAdventureCards.adversaries[piece];
-                story[adversary.stage].adversaries.push(piece);
-            }
-            if(callToAdventureCards.traits[piece]) {
-                let trait = callToAdventureCards.traits[piece];
-                story[trait.stage].traits.push(piece);
-            }
-            if(callToAdventureCards.allies[piece]) {
-                let ally = callToAdventureCards.allies[piece];
-                story[ally.stage].allies.push(piece);
-            }
-            if(callToAdventureCards.origins.includes(piece)){
-                story.early.origin = piece;
-            }
-            if(callToAdventureCards.motivations.includes(piece)){
-                story.middle.motivation = piece;
-            }
-            if(callToAdventureCards.destinies.includes(piece)){
-                story.late.destiny = piece;
+            if (data) {
+                if (data.type === 'origin' || data.type === 'motivation' || data.type === 'destiny') {
+                    jsonStory[data.stage][data.type] = data.card;
+                    continue;
+                } else {
+                    let {type, ...rest} = data;
+                    jsonStory[data.stage][data.type].push(rest);
+                    continue
+                }
+                
             }
         }
-        return story as CallToAdventureStory
+        jsonStory.early.name = name;
+        return {response, jsonStory} 
     }
 
-    async getWrittenStoryFromOpenAi(jsonStory: CallToAdventureStory) {
-        const completion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    role: 'system',
-                    content: `You are a story generator for the board game Call to Adventure. You will be required to make a story from the following json object: ${JSON.stringify(callToAdventureCards.baseStory)}. The Story will take into account the challeges faced, the origins, allies gained, and adversaries faced. The story will also have a cohesive flow, with character development and adding some filler to use as transitions between stages. You will try not to explicitly mention early, middle, and late stages and instead transition through events. You will also try not to explicitly mention that the challenges were challenges, format them like a piece of a cohesive story. Please add names for characters and locations. Please give it some fluff so it reads more like a novel. You will only ever reply with the story you created.`
-                },
-                {
-                    role: 'user', 
-                    content: JSON.stringify(jsonStory)
-                }
-            ],
-            temperature: .8,
-            n: 2
-        });
-        return completion.data;
+    async getWrittenStoryFromOpenAi(jsonStory: any, openai: OpenAIClient): Promise<OpenAI.Responses.Response & { output_parsed?: unknown }> {
+        const response = await openai.createAIResponse(`You are a professional fantasy writer specializing in crafting novel‐style adventures.
+            When given a JSON object {${JSON.stringify(baseStory)}}, you must:
+
+            Parse its keys:
+
+            early.name (the hero’s name)
+
+            early.origin (the hero’s background)
+
+            middle.motivation (the hero’s driving force)
+
+            late.destiny (the hero’s ultimate goal)
+
+            (early | middle | late).challenges (obstacles overcome)
+
+            (early | middle | late).allies (companions gained)
+
+            (early | middle | late).adversaries (foes encountered)
+
+            (early | middle | late).traits (character traits developed)
+
+            Weave these elements into a single, cohesive narrative of 300–500 words, with flowing transitions.
+
+            Name characters and locations creatively.
+
+            Show character development—don’t label “early,” “middle,” or “late” stages.
+
+            Avoid calling events “challenges” or “obstacles” in the narration; integrate them seamlessly.
+
+            Write in a vivid, novel‐like tone with “fluff” (sensory details, internal thoughts, scenic descriptions).
+
+            Format your response strictly as the finished story—no additional commentary, headings, or JSON.`,
+        [
+            {
+                role: 'user',
+                content: JSON.stringify(jsonStory)
+            }
+        ]);
+        return response;
     }
 }

@@ -2,7 +2,6 @@ import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import * as middlewares from './middlewares.js';
 import routes from './routes/index.js';
 
@@ -17,7 +16,6 @@ app.use(cors({
     credentials: true,
     optionsSuccessStatus: 200,
 }));
-app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(express.json());

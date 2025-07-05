@@ -14,4 +14,4 @@ export default [
     'Tempted by Darkness',
     'Thirst for Knowledge',
     'Natural Leader',
-]
+] as const;

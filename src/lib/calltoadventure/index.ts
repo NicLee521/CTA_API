@@ -1,46 +1,63 @@
-import unTypedadversaries from "./adversaries.js"
-import unTypedallies from "./allies.js"
-import unTypedchallenges from "./challenges.js"
+import { z } from "zod";
+import adversaries from "./adversaries.js"
+import allies from "./allies.js"
+import challenges from "./challenges.js"
 import motivations from "./motivations.js"
 import origins from "./origins.js"
-import unTypedtraits from "./traits.js"
+import traits from "./traits.js"
 import destinies from "./destinies.js"
 
-let adversaries = unTypedadversaries as any; 
-let allies = unTypedallies as any; 
-let challenges = unTypedchallenges as any; 
-let traits = unTypedtraits as any;
-let baseStory = {
+type ChallengeKey = keyof typeof challenges;
+type AdversaryKey = keyof typeof adversaries;
+type AllyKey = keyof typeof allies;
+type TraitKey = keyof typeof traits;
+type MotivationKey = typeof motivations[number];
+type OriginKey = typeof origins[number];
+type DestinyKey = typeof destinies[number];
+
+const baseStory = {
     early: {
-        name: '',
-        origin: '',
-        challenges: [],
-        traits: [],
-        allies: [],
-        adversaries: []
+        name: '' as string,
+        origin: '' as OriginKey,
+        challenges: [] as ChallengeKey[],
+        traits: [] as TraitKey[],
+        allies: [] as AllyKey[],
+        adversaries: [] as AdversaryKey[]
     },
     middle: {
-        motivation: '',
-        challenges: [],
-        traits: [],
-        allies: [],
-        adversaries: []
+        motivation: '' as MotivationKey,
+        challenges: [] as ChallengeKey[],
+        traits: [] as TraitKey[],
+        allies: [] as AllyKey[],
+        adversaries: [] as AdversaryKey[]
     },
     late: {
-        destiny: '',
-        challenges: [],
-        traits: [],
-        allies: [],
-        adversaries: []
+        destiny: '' as DestinyKey,
+        challenges: [] as ChallengeKey[],
+        traits: [] as TraitKey[],
+        allies: [] as AllyKey[],
+        adversaries: [] as AdversaryKey[]
     }
 }
+
+const allCards = [
+    ...Object.keys(adversaries),
+    ...Object.keys(allies),
+    ...Object.keys(challenges),
+    ...motivations,
+    ...origins,
+    ...Object.keys(traits),
+    ...destinies
+];
+
 export {
+    baseStory,
+    allCards,
     adversaries,
     allies,
     challenges,
     motivations,
     origins,
     traits,
-    destinies,
-    baseStory
-}
+    destinies
+};

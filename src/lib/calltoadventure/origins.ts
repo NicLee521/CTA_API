@@ -14,4 +14,4 @@ export default [
     'Outlander',
     'Settler',
     'Pickpocket',
-]
+] as const
