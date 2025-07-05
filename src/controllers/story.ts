@@ -83,13 +83,13 @@ export class StoryController {
         for (let key of outputParsed.cards) {
             let data: any = null;
             if (callToAdventureCards.challenges && key in callToAdventureCards.challenges) {
-                data = { ...callToAdventureCards.challenges[key as keyof typeof callToAdventureCards.challenges], type: 'challenges' };
+                data = { ...callToAdventureCards.challenges[key as keyof typeof callToAdventureCards.challenges], choice: key, type: 'challenges' };
             } else if (callToAdventureCards.adversaries && key in callToAdventureCards.adversaries) {
-                data = { ...callToAdventureCards.adversaries[key as keyof typeof callToAdventureCards.adversaries], type: 'adversaries' };
+                data = { ...callToAdventureCards.adversaries[key as keyof typeof callToAdventureCards.adversaries], adversary: key, type: 'adversaries' };
             } else if (callToAdventureCards.traits && key in callToAdventureCards.traits) {
-                data = { ...callToAdventureCards.traits[key as keyof typeof callToAdventureCards.traits], type: 'traits' };
+                data = { ...callToAdventureCards.traits[key as keyof typeof callToAdventureCards.traits], trait: key, type: 'traits' };
             } else if (callToAdventureCards.allies && key in callToAdventureCards.allies) {
-                data = { ...callToAdventureCards.allies[key as keyof typeof callToAdventureCards.allies], type: 'allies' };
+                data = { ...callToAdventureCards.allies[key as keyof typeof callToAdventureCards.allies], ally: key, type: 'allies' };
             } else if (callToAdventureCards.origins?.includes(key as typeof callToAdventureCards.origins[number])) {
                 data = { stage: 'early', card: key, type: 'origin' };
             } else if (callToAdventureCards.motivations?.includes(key as typeof callToAdventureCards.motivations[number])) {
@@ -102,8 +102,8 @@ export class StoryController {
                     jsonStory[data.stage][data.type] = data.card;
                     continue;
                 } else {
-                    let {type, ...rest} = data;
-                    jsonStory[data.stage][data.type].push(rest);
+                    let {type, stage, ...rest} = data;
+                    jsonStory[stage][data.type].push(rest);
                     continue
                 }
                 
