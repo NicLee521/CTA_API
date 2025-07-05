@@ -3,7 +3,7 @@ import Story from '../models/story.js';
 import UserType from '../interfaces/Request.js'
 import { OpenAIClient } from "../lib/openai.js";
 import * as CallToAdventureData from "../lib/calltoadventure/index.js";
-const { baseStory, baseStorySchema, allCards, ...callToAdventureCards } = CallToAdventureData;
+const { baseStory, allCards, ...callToAdventureCards } = CallToAdventureData;
 import { unlink } from "fs/promises";
 import type OpenAI from "openai";
 import { createWorker } from 'tesseract.js';
